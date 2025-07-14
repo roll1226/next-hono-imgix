@@ -1,7 +1,11 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import { fetchHonoHelloAction, fetchHonoRootAction } from "./server-action";
 
-export default function Home() {
+export default async function Home() {
+  const rootMessage = await fetchHonoRootAction();
+  const helloMessage = await fetchHonoHelloAction();
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -45,6 +49,19 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+
+        {/* Hono API連携表示部分 */}
+        <section style={{ marginTop: 32 }}>
+          <h2>Hono API連携サンプル</h2>
+          <div>
+            <h3>/api</h3>
+            <pre>{rootMessage}</pre>
+          </div>
+          <div>
+            <h3>/api/hello</h3>
+            <pre>{JSON.stringify(helloMessage, null, 2)}</pre>
+          </div>
+        </section>
       </main>
       <footer className={styles.footer}>
         <a
