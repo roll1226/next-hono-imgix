@@ -5,8 +5,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
     volumes:
@@ -16,9 +16,9 @@ services:
     image: postgres:16
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
