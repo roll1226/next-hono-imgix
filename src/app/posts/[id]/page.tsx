@@ -1,4 +1,4 @@
-import { getPost, getOgp } from "@/app/server-action";
+import { getOgp, getPost } from "@/app/server-action";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -12,34 +12,33 @@ export const generateMetadata = async ({
   params,
 }: PostPageProps): Promise<Metadata> => {
   const { id } = await params;
-  const post = await getPost(id);
   const ogpData = await getOgp(id);
 
-  if (!post || !ogpData) {
+  if (!ogpData) {
     return {
       title: "Post not found",
     };
   }
 
   return {
-    title: post.title,
-    description: post.description || "No description available",
+    title: ogpData.title,
+    description: ogpData.description || "No description available",
     openGraph: {
-      title: post.title,
-      description: post.description || "No description available",
+      title: ogpData.title,
+      description: ogpData.description || "No description available",
       images: [
         {
           url: ogpData.ogpUrl,
           width: 1200,
           height: 630,
-          alt: post.title,
+          alt: ogpData.title,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
-      description: post.description || "No description available",
+      title: ogpData.title,
+      description: ogpData.description || "No description available",
       images: [ogpData.ogpUrl],
     },
   };
