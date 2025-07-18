@@ -1,26 +1,19 @@
-import { getHonoOgpById, getHonoPostById } from "@/app/api-access";
+import { getPost, getOgp } from "@/app/server-action";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 type PostPageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
-};
-
-const getPost = async (id: string) => {
-  return await getHonoPostById(id);
-};
-
-const getOgp = async (id: string) => {
-  return await getHonoOgpById(id);
+  }>;
 };
 
 export const generateMetadata = async ({
   params,
 }: PostPageProps): Promise<Metadata> => {
-  const post = await getPost(params.id);
-  const ogpData = await getOgp(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
+  const ogpData = await getOgp(id);
 
   if (!post || !ogpData) {
     return {
@@ -53,7 +46,8 @@ export const generateMetadata = async ({
 };
 
 export default async function PostPage({ params }: PostPageProps) {
-  const post = await getPost(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
 
   if (!post) {
     notFound();
