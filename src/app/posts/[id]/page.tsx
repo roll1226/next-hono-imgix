@@ -1,4 +1,6 @@
 import { getOgp, getPost } from "@/app/server-action";
+import PostDetail from "@/components/post-detail";
+import PostError from "@/components/post-error";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -11,60 +13,63 @@ type PostPageProps = {
 export const generateMetadata = async ({
   params,
 }: PostPageProps): Promise<Metadata> => {
-  const { id } = await params;
-  const ogpData = await getOgp(id);
+  try {
+    const { id } = await params;
+    const ogpData = await getOgp(id);
 
-  if (!ogpData) {
+    if (!ogpData) {
+      return {
+        title: "投稿が見つかりません",
+        description:
+          "指定された投稿は存在しないか、削除された可能性があります。",
+      };
+    }
+
     return {
-      title: "Post not found",
+      title: ogpData.title,
+      description: ogpData.description || "No description available",
+      openGraph: {
+        title: ogpData.title,
+        description: ogpData.description || "No description available",
+        images: [
+          {
+            url: ogpData.ogpUrl,
+            width: 1200,
+            height: 630,
+            alt: ogpData.title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: ogpData.title,
+        description: ogpData.description || "No description available",
+        images: [ogpData.ogpUrl],
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "エラーが発生しました",
+      description: "メタデータの生成中にエラーが発生しました。",
     };
   }
-
-  return {
-    title: ogpData.title,
-    description: ogpData.description || "No description available",
-    openGraph: {
-      title: ogpData.title,
-      description: ogpData.description || "No description available",
-      images: [
-        {
-          url: ogpData.ogpUrl,
-          width: 1200,
-          height: 630,
-          alt: ogpData.title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: ogpData.title,
-      description: ogpData.description || "No description available",
-      images: [ogpData.ogpUrl],
-    },
-  };
 };
 
-export default async function PostPage({ params }: PostPageProps) {
-  const { id } = await params;
-  const post = await getPost(id);
+const PostPage = async ({ params }: PostPageProps) => {
+  try {
+    const { id } = await params;
+    const post = await getPost(id);
 
-  if (!post) {
-    notFound();
+    if (!post) {
+      notFound();
+    }
+
+    return <PostDetail post={post} />;
+  } catch (error) {
+    console.error("Error loading post:", error);
+    return <PostError />;
   }
+};
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <article>
-        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        {post.description && (
-          <p className="text-gray-600 mb-6">{post.description}</p>
-        )}
-        <div className="mt-8">
-          <p className="text-sm text-gray-500">
-            Created: {new Date(post.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-      </article>
-    </div>
-  );
-}
+export default PostPage;

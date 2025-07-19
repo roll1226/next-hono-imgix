@@ -26,7 +26,7 @@ services:
     command: npm run db:studio
 
   db:
-    image: postgres:16
+    image: postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

@@ -1,4 +1,4 @@
-export function generateImgixOgpUrl(title: string): string {
+export const generateImgixOgpUrl = (title: string): string => {
   const imgixDomain = process.env.IMGIX_URL || "your-imgix-domain.imgix.net";
   const baseImage = "yep/ogp.jpg";
 
@@ -16,4 +16,4 @@ export function generateImgixOgpUrl(title: string): string {
   });
 
   return `https://${imgixDomain}/${baseImage}?${params.toString()}`;
-}
+};
