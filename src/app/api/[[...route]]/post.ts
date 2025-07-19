@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { db, withRetry, withTransaction } from "@/db";
 import { posts } from "@/db/schema";
 import { generateImgixOgpUrl } from "@/lib/imgix";
 import { zValidator } from "@hono/zod-validator";
@@ -31,7 +31,10 @@ export type GetParams = z.infer<typeof schema>;
 const app = new Hono()
   .get("/", async (c) => {
     try {
-      const allPosts = await db.select().from(posts);
+      // リトライ機能付きでデータ取得
+      const allPosts = await withRetry(async () => {
+        return await db.select().from(posts);
+      });
 
       // キャッシュを無効化するヘッダーを設定
       c.header(
@@ -56,7 +59,10 @@ const app = new Hono()
         return c.json({ error: "Invalid ID" }, 400);
       }
 
-      const post = await db.select().from(posts).where(eq(posts.id, numericId));
+      // リトライ機能付きで個別投稿を取得
+      const post = await withRetry(async () => {
+        return await db.select().from(posts).where(eq(posts.id, numericId));
+      });
 
       if (post.length === 0) {
         return c.json({ error: "Post not found" }, 404);
@@ -115,13 +121,29 @@ const app = new Hono()
         return c.json({ error: "説明は1000文字以内で入力してください" }, 400);
       }
 
-      const [newPost] = await db
-        .insert(posts)
-        .values({
-          title: title.trim(),
-          description: description || null,
-        })
-        .returning();
+      // トランザクション＋リトライでデータ整合性を保証
+      const newPost = await withTransaction(async (tx) => {
+        // 同じタイトルの投稿が既に存在しないかチェック（楽観的ロック）
+        const existingPosts = await tx
+          .select()
+          .from(posts)
+          .where(eq(posts.title, title.trim()));
+
+        if (existingPosts.length > 0) {
+          throw new Error("同じタイトルの投稿が既に存在します");
+        }
+
+        // 新しい投稿を作成
+        const [insertedPost] = await tx
+          .insert(posts)
+          .values({
+            title: title.trim(),
+            description: description || null,
+          })
+          .returning();
+
+        return insertedPost;
+      });
 
       if (!newPost) {
         return c.json({ error: "投稿の作成に失敗しました" }, 500);
@@ -133,22 +155,75 @@ const app = new Hono()
 
       // データベースエラーの詳細を判定
       if (error instanceof Error) {
+        // 重複エラー
         if (
+          error.message.includes("同じタイトルの投稿が既に存在します") ||
           error.message.includes("duplicate") ||
-          error.message.includes("unique")
+          error.message.includes("unique") ||
+          error.message.includes("23505") // PostgreSQL unique violation
         ) {
           return c.json({ error: "同じタイトルの投稿が既に存在します" }, 409);
-        } else if (
+        }
+        // 接続・タイムアウトエラー
+        else if (
           error.message.includes("connection") ||
-          error.message.includes("timeout")
+          error.message.includes("timeout") ||
+          error.message.includes("pool") ||
+          error.message.includes("53300") || // too_many_connections
+          error.message.includes("08006") // connection_failure
         ) {
-          return c.json({ error: "データベース接続エラーが発生しました" }, 503);
-        } else if (error.message.includes("constraint")) {
+          return c.json(
+            {
+              error:
+                "データベース接続エラーが発生しました。しばらくしてから再度お試しください。",
+              retryable: true,
+            },
+            503
+          );
+        }
+        // デッドロックエラー
+        else if (
+          error.message.includes("40P01") ||
+          error.message.includes("deadlock")
+        ) {
+          return c.json(
+            {
+              error: "一時的な競合が発生しました。もう一度お試しください。",
+              retryable: true,
+            },
+            409
+          );
+        }
+        // 制約違反エラー
+        else if (
+          error.message.includes("constraint") ||
+          error.message.includes("23") // PostgreSQL integrity constraint violation
+        ) {
           return c.json({ error: "入力データに問題があります" }, 400);
+        }
+        // データベース容量・リソース不足
+        else if (
+          error.message.includes("53200") || // out_of_memory
+          error.message.includes("53400") // configuration_limit_exceeded
+        ) {
+          return c.json(
+            {
+              error:
+                "サーバーリソースが不足しています。しばらくしてから再度お試しください。",
+              retryable: true,
+            },
+            503
+          );
         }
       }
 
-      return c.json({ error: "投稿の作成に失敗しました" }, 500);
+      return c.json(
+        {
+          error: "投稿の作成に失敗しました",
+          retryable: false,
+        },
+        500
+      );
     }
   });
 
