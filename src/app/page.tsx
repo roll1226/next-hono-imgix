@@ -3,6 +3,10 @@ import PostsActions from "@/components/posts-actions";
 import PostsList from "@/components/posts-list";
 import { getPosts } from "./server-action";
 
+// Dynamic Renderingを強制してSSR時のキャッシュを無効化
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const Home = async () => {
   try {
     const posts = await getPosts();

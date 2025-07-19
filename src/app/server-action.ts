@@ -1,4 +1,5 @@
 "use server";
+import { revalidatePath } from "next/cache";
 import {
   getHonoHello,
   getHonoOgpById,
@@ -82,6 +83,10 @@ export const insertPost = async (postData: InsertPostForm) => {
     if (!result) {
       throw new Error("投稿の作成に失敗しました");
     }
+
+    // 投稿作成後にホームページのキャッシュを無効化
+    revalidatePath("/");
+    revalidatePath("/api/posts");
 
     return result;
   } catch (error) {

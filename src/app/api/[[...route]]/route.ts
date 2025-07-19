@@ -3,6 +3,10 @@ import { handle } from "hono/vercel";
 import post from "./post";
 import template from "./template";
 
+// Dynamic APIを強制してキャッシュを無効化
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const app = new Hono()
   .basePath("/api")
   .route("/", template)

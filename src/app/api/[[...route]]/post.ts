@@ -32,6 +32,15 @@ const app = new Hono()
   .get("/", async (c) => {
     try {
       const allPosts = await db.select().from(posts);
+
+      // キャッシュを無効化するヘッダーを設定
+      c.header(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate"
+      );
+      c.header("Pragma", "no-cache");
+      c.header("Expires", "0");
+
       return c.json(allPosts);
     } catch (error) {
       console.error("Failed to fetch posts:", error);

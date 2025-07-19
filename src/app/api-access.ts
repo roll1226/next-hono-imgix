@@ -29,7 +29,18 @@ export const getHonoHello = async () => {
 
 export const getHonoPosts = async () => {
   try {
-    const res = await client.api.posts.$get();
+    const res = await client.api.posts.$get(
+      {},
+      {
+        // キャッシュを無効化してリアルタイムデータを取得
+        init: {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        },
+      }
+    );
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }

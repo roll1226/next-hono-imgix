@@ -1,0 +1,11 @@
+# Vercel Environment Variables
+# これらの環境変数をVercelのダッシュボードで設定してください
+
+# Database (Vercel Postgres or Neon など)
+DATABASE_URL=postgresql://username:password@host:port/database
+
+# App URL (VercelのデプロイURL)
+NEXT_PUBLIC_APP_URL=https://your-app-name.vercel.app
+
+# Imgix (必要に応じて)
+IMGIX_URL=your-imgix-domain.imgix.net
