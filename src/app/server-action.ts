@@ -62,8 +62,8 @@ export const insertPost = async (postData: InsertPostForm) => {
       throw new Error("タイトルは必須項目です");
     }
 
-    if (postData.title.trim().length > 255) {
-      throw new Error("タイトルは255文字以内で入力してください");
+    if (postData.title.trim().length > 32) {
+      throw new Error("タイトルは32文字以内で入力してください");
     }
 
     if (postData.description && postData.description.length > 1000) {

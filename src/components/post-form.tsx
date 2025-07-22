@@ -20,7 +20,7 @@ const postFormSchema = z.object({
   title: z
     .string()
     .min(1, "タイトルを入力してください")
-    .max(255, "タイトルは255文字以内で入力してください"),
+    .max(32, "タイトルは32文字以内で入力してください"),
   description: z
     .string()
     .max(1000, "説明は1000文字以内で入力してください")
@@ -119,8 +119,8 @@ const PostForm = () => {
         throw new Error("タイトルは必須です");
       }
 
-      if (values.title.length > 255) {
-        throw new Error("タイトルは255文字以内で入力してください");
+      if (values.title.length > 32) {
+        throw new Error("タイトルは32文字以内で入力してください");
       }
 
       if (values.description && values.description.length > 1000) {
@@ -229,6 +229,8 @@ const PostForm = () => {
                 {...field}
                 id="title"
                 placeholder="投稿のタイトルを入力"
+                maxLength={32}
+                showCount
                 disabled={loading || isCompleted}
                 status={errors.title ? "error" : ""}
               />

@@ -10,7 +10,7 @@ const insertPostSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
-    .max(255, "Title must be less than 255 characters"),
+    .max(32, "Title must be less than 32 characters"),
   description: z
     .string()
     .optional()
@@ -110,11 +110,8 @@ const app = new Hono()
         return c.json({ error: "タイトルは必須です" }, 400);
       }
 
-      if (title.trim().length > 255) {
-        return c.json(
-          { error: "タイトルは255文字以内で入力してください" },
-          400
-        );
+      if (title.trim().length > 32) {
+        return c.json({ error: "タイトルは32文字以内で入力してください" }, 400);
       }
 
       if (description && description.length > 1000) {

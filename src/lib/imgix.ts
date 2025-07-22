@@ -13,6 +13,7 @@ export const generateImgixOgpUrl = (title: string): string => {
     h: "630",
     fit: "crop",
     auto: "format",
+    txtfont: "Hiragino Sans W5",
   });
 
   return `https://${imgixDomain}/${baseImage}?${params.toString()}`;
