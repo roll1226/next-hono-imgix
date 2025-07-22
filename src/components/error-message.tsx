@@ -6,6 +6,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { Alert, Button, Space } from "antd";
+import Link from "next/link";
 import styled from "styled-components";
 
 const ErrorContainer = styled.div`
@@ -81,14 +82,15 @@ const ErrorMessage = ({
                 再試行
               </Button>
             )}
-            <Button
-              icon={<HomeOutlined />}
-              onClick={() => (window.location.href = "/")}
-              size="large"
-              block
-            >
-              ホームに戻る
-            </Button>
+            <Link href="/">
+              <Button
+                icon={<HomeOutlined />}
+                size="large"
+                block
+              >
+                ホームに戻る
+              </Button>
+            </Link>
           </StyledSpace>
         </ButtonContainer>
       </ErrorContent>

@@ -2,7 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Button, Input, message, Typography } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
@@ -61,8 +63,18 @@ const ErrorText = styled.span`
 const ButtonContainer = styled.div`
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: 2rem;
+`;
+
+const LeftButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const RightButtons = styled.div`
+  display: flex;
+  gap: 1rem;
 `;
 
 const StyledTitle = styled(Title)`
@@ -233,12 +245,22 @@ const PostForm = () => {
         </FormItem>
 
         <ButtonContainer>
-          <Button onClick={onReset} disabled={loading}>
-            リセット
-          </Button>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            投稿を作成
-          </Button>
+          <LeftButtons>
+            <Link href="/">
+              <Button icon={<HomeOutlined />} disabled={loading}>
+                ホームに戻る
+              </Button>
+            </Link>
+          </LeftButtons>
+          
+          <RightButtons>
+            <Button onClick={onReset} disabled={loading}>
+              リセット
+            </Button>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              投稿を作成
+            </Button>
+          </RightButtons>
         </ButtonContainer>
       </StyledForm>
     </FormContainer>
