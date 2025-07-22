@@ -95,7 +95,7 @@ const PostDetail = ({ post }: PostDetailProps) => {
             )}
           </span>
         </DateContainer>
-        
+
         <ButtonContainer>
           <Link href="/">
             <HomeButton type="default" icon={<HomeOutlined />}>

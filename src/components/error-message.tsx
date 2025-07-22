@@ -83,11 +83,7 @@ const ErrorMessage = ({
               </Button>
             )}
             <Link href="/">
-              <Button
-                icon={<HomeOutlined />}
-                size="large"
-                block
-              >
+              <Button icon={<HomeOutlined />} size="large" block>
                 ホームに戻る
               </Button>
             </Link>
