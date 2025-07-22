@@ -89,6 +89,7 @@ const StyledAlert = styled(Alert)`
 const PostForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
   const {
@@ -106,6 +107,9 @@ const PostForm = () => {
   const onSubmit: SubmitHandler<z.infer<typeof postFormSchema>> = async (
     values
   ) => {
+    // 完了状態では実行しない
+    if (isCompleted) return;
+
     setLoading(true);
     setError(null);
 
@@ -134,7 +138,7 @@ const PostForm = () => {
       });
 
       message.success("投稿を作成しました！");
-      // form.resetFields();
+      setIsCompleted(true); // 完了状態に設定
 
       // 少し遅延してからリダイレクト（ユーザーが成功メッセージを確認できるように）
       setTimeout(() => {
@@ -181,6 +185,9 @@ const PostForm = () => {
   };
 
   const onReset = () => {
+    // 完了状態では実行しない
+    if (isCompleted) return;
+
     // form.resetFields();
     setError(null);
   };
@@ -200,6 +207,15 @@ const PostForm = () => {
         />
       )}
 
+      {isCompleted && (
+        <StyledAlert
+          message="投稿作成完了"
+          description="投稿が正常に作成されました。しばらくお待ちください..."
+          type="success"
+          showIcon
+        />
+      )}
+
       <StyledForm onSubmit={handleSubmit(onSubmit)}>
         <FormItem>
           <Text strong>
@@ -213,7 +229,7 @@ const PostForm = () => {
                 {...field}
                 id="title"
                 placeholder="投稿のタイトルを入力"
-                disabled={loading}
+                disabled={loading || isCompleted}
                 status={errors.title ? "error" : ""}
               />
             )}
@@ -234,7 +250,7 @@ const PostForm = () => {
                 placeholder="投稿の説明を入力（任意）"
                 showCount
                 maxLength={1000}
-                disabled={loading}
+                disabled={loading || isCompleted}
                 status={errors.description ? "error" : ""}
               />
             )}
@@ -247,17 +263,22 @@ const PostForm = () => {
         <ButtonContainer>
           <LeftButtons>
             <Link href="/">
-              <Button icon={<HomeOutlined />} disabled={loading}>
+              <Button icon={<HomeOutlined />} disabled={loading || isCompleted}>
                 ホームに戻る
               </Button>
             </Link>
           </LeftButtons>
 
           <RightButtons>
-            <Button onClick={onReset} disabled={loading}>
+            <Button onClick={onReset} disabled={loading || isCompleted}>
               リセット
             </Button>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              disabled={isCompleted}
+            >
               投稿を作成
             </Button>
           </RightButtons>
