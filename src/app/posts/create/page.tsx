@@ -4,8 +4,8 @@ import PageHeader from "@/components/page-header";
 import PostForm from "@/components/post-form";
 
 export const metadata: Metadata = {
-  title: "新規投稿 - Next.js + Hono Blog",
-  description: "新しい投稿を作成する",
+  title: "新規投稿",
+  description: "新しい投稿を作成してください",
 };
 
 const CreatePostPage = () => {
