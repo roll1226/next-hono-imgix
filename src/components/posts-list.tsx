@@ -5,6 +5,7 @@ import { CalendarOutlined, EyeOutlined } from "@ant-design/icons";
 import { Card, List, Typography } from "antd";
 import { format } from "date-fns";
 import Link from "next/link";
+import { useMemo } from "react";
 import styled from "styled-components";
 const { Paragraph, Text } = Typography;
 
@@ -41,6 +42,21 @@ type PostsListProps = {
 };
 
 const PostsList = ({ posts }: PostsListProps) => {
+  // 投稿データの変換をメモ化
+  const formattedPosts = useMemo(() => {
+    if (!posts || posts.length === 0) return [];
+
+    return posts.map((post: Post) => ({
+      ...post,
+      formattedDate: format(
+        typeof post.createdAt === "string"
+          ? new Date(post.createdAt)
+          : post.createdAt,
+        "yyyy/MM/dd"
+      ),
+    }));
+  }, [posts]);
+
   if (!posts || posts.length === 0) {
     return (
       <EmptyStateContainer>
@@ -60,8 +76,8 @@ const PostsList = ({ posts }: PostsListProps) => {
         xl: 3,
         xxl: 3,
       }}
-      dataSource={posts}
-      renderItem={(post: Post) => (
+      dataSource={formattedPosts}
+      renderItem={(post) => (
         <List.Item>
           <Link href={`/posts/${post.id}`}>
             <Card hoverable actions={[<EyeOutlined key="view" />]}>
@@ -80,12 +96,7 @@ const PostsList = ({ posts }: PostsListProps) => {
                     )}
                     <DateContainer>
                       <CalendarOutlined />
-                      {format(
-                        typeof post.createdAt === "string"
-                          ? new Date(post.createdAt)
-                          : post.createdAt,
-                        "yyyy/MM/dd"
-                      )}
+                      {post.formattedDate}
                     </DateContainer>
                   </DescriptionContainer>
                 }

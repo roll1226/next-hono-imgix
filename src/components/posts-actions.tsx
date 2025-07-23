@@ -3,6 +3,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Typography } from "antd";
 import Link from "next/link";
+import { memo } from "react";
 import styled from "styled-components";
 
 const { Title, Text } = Typography;
@@ -25,7 +26,7 @@ type PostsActionsProps = {
   subtitle: string;
 };
 
-const PostsActions = ({ title, subtitle }: PostsActionsProps) => {
+const PostsActions = memo(({ title, subtitle }: PostsActionsProps) => {
   return (
     <ActionContainer>
       <TitleSection>
@@ -41,6 +42,8 @@ const PostsActions = ({ title, subtitle }: PostsActionsProps) => {
       </Link>
     </ActionContainer>
   );
-};
+});
+
+PostsActions.displayName = "PostsActions";
 
 export default PostsActions;

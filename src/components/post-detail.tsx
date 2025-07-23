@@ -5,6 +5,7 @@ import { CalendarOutlined, HomeOutlined } from "@ant-design/icons";
 import { Button, Card, Divider, Typography } from "antd";
 import { format } from "date-fns";
 import Link from "next/link";
+import { useMemo } from "react";
 import styled from "styled-components";
 
 const { Title, Paragraph, Text } = Typography;
@@ -64,6 +65,16 @@ type PostDetailProps = {
 };
 
 const PostDetail = ({ post }: PostDetailProps) => {
+  // 日付フォーマットをメモ化
+  const formattedDate = useMemo(() => {
+    return format(
+      typeof post.createdAt === "string"
+        ? new Date(post.createdAt)
+        : post.createdAt,
+      "yyyy/MM/dd"
+    );
+  }, [post.createdAt]);
+
   return (
     <PostContainer>
       <StyledCard>
@@ -85,15 +96,7 @@ const PostDetail = ({ post }: PostDetailProps) => {
         <Divider />
         <DateContainer>
           <CalendarOutlined />
-          <span>
-            作成日:{" "}
-            {format(
-              typeof post.createdAt === "string"
-                ? new Date(post.createdAt)
-                : post.createdAt,
-              "yyyy/MM/dd"
-            )}
-          </span>
+          <span>作成日: {formattedDate}</span>
         </DateContainer>
 
         <ButtonContainer>

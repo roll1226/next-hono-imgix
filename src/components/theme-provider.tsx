@@ -2,7 +2,7 @@
 
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { ConfigProvider, Space, Switch, theme } from "antd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 const ThemeContainer = styled.div<{ $isDarkMode: boolean }>`
@@ -53,11 +53,11 @@ const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, []);
 
   // テーマ変更をローカルストレージに保存
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
     localStorage.setItem("theme", newTheme ? "dark" : "light");
-  };
+  }, [isDarkMode]);
 
   const { defaultAlgorithm, darkAlgorithm } = theme;
 

@@ -1,4 +1,12 @@
+// メモ化用のキャッシュ
+const imgixUrlCache = new Map<string, string>();
+
 export const generateImgixOgpUrl = (title: string): string => {
+  // キャッシュにあれば返す
+  if (imgixUrlCache.has(title)) {
+    return imgixUrlCache.get(title)!;
+  }
+
   const imgixDomain = process.env.IMGIX_URL || "your-imgix-domain.imgix.net";
   const baseImage = "yep/ogp.jpg";
 
@@ -41,5 +49,16 @@ export const generateImgixOgpUrl = (title: string): string => {
     q: "90", // 画質を高めに設定
   });
 
-  return `https://${imgixDomain}/${baseImage}?${params.toString()}`;
+  const url = `https://${imgixDomain}/${baseImage}?${params.toString()}`;
+
+  // キャッシュに保存（最大100個まで）
+  if (imgixUrlCache.size >= 100) {
+    const firstKey = imgixUrlCache.keys().next().value;
+    if (firstKey) {
+      imgixUrlCache.delete(firstKey);
+    }
+  }
+  imgixUrlCache.set(title, url);
+
+  return url;
 };

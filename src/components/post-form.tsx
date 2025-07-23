@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Button, Input, message, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { z } from "zod";
@@ -104,93 +104,94 @@ const PostForm = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof postFormSchema>> = async (
-    values
-  ) => {
-    // 完了状態では実行しない
-    if (isCompleted) return;
+  const onSubmit: SubmitHandler<z.infer<typeof postFormSchema>> = useCallback(
+    async (values) => {
+      // 完了状態では実行しない
+      if (isCompleted) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      // バリデーション
-      if (!values.title?.trim()) {
-        throw new Error("タイトルは必須です");
-      }
-
-      if (values.title.length > 32) {
-        throw new Error("タイトルは32文字以内で入力してください");
-      }
-
-      if (values.description && values.description.length > 1000) {
-        throw new Error("説明は1000文字以内で入力してください");
-      }
-
-      const trimmedDescription = values.description?.trim();
-
-      await insertPost({
-        title: values.title.trim(),
-        description:
-          trimmedDescription && trimmedDescription.length > 0
-            ? trimmedDescription
-            : undefined,
-      });
-
-      message.success("投稿を作成しました！");
-      setIsCompleted(true); // 完了状態に設定
-
-      // 少し遅延してからリダイレクト（ユーザーが成功メッセージを確認できるように）
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    } catch (error) {
-      console.error("投稿作成エラー:", error);
-
-      let errorMessage = "投稿の作成に失敗しました。";
-
-      if (error instanceof Error) {
-        // 特定のエラーメッセージを処理
-        if (
-          error.message.includes("network") ||
-          error.message.includes("fetch")
-        ) {
-          errorMessage =
-            "ネットワークエラーが発生しました。インターネット接続を確認してください。";
-        } else if (error.message.includes("timeout")) {
-          errorMessage =
-            "リクエストがタイムアウトしました。もう一度お試しください。";
-        } else if (error.message.includes("validation")) {
-          errorMessage = "入力内容に問題があります。内容を確認してください。";
-        } else if (
-          error.message.includes("title") ||
-          error.message.includes("タイトル")
-        ) {
-          errorMessage = error.message;
-        } else if (
-          error.message.includes("description") ||
-          error.message.includes("説明")
-        ) {
-          errorMessage = error.message;
-        } else {
-          errorMessage = `エラー: ${error.message}`;
+      try {
+        // バリデーション
+        if (!values.title?.trim()) {
+          throw new Error("タイトルは必須です");
         }
+
+        if (values.title.length > 32) {
+          throw new Error("タイトルは32文字以内で入力してください");
+        }
+
+        if (values.description && values.description.length > 1000) {
+          throw new Error("説明は1000文字以内で入力してください");
+        }
+
+        const trimmedDescription = values.description?.trim();
+
+        await insertPost({
+          title: values.title.trim(),
+          description:
+            trimmedDescription && trimmedDescription.length > 0
+              ? trimmedDescription
+              : undefined,
+        });
+
+        message.success("投稿を作成しました！");
+        setIsCompleted(true); // 完了状態に設定
+
+        // 少し遅延してからリダイレクト（ユーザーが成功メッセージを確認できるように）
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } catch (error) {
+        console.error("投稿作成エラー:", error);
+
+        let errorMessage = "投稿の作成に失敗しました。";
+
+        if (error instanceof Error) {
+          // 特定のエラーメッセージを処理
+          if (
+            error.message.includes("network") ||
+            error.message.includes("fetch")
+          ) {
+            errorMessage =
+              "ネットワークエラーが発生しました。インターネット接続を確認してください。";
+          } else if (error.message.includes("timeout")) {
+            errorMessage =
+              "リクエストがタイムアウトしました。もう一度お試しください。";
+          } else if (error.message.includes("validation")) {
+            errorMessage = "入力内容に問題があります。内容を確認してください。";
+          } else if (
+            error.message.includes("title") ||
+            error.message.includes("タイトル")
+          ) {
+            errorMessage = error.message;
+          } else if (
+            error.message.includes("description") ||
+            error.message.includes("説明")
+          ) {
+            errorMessage = error.message;
+          } else {
+            errorMessage = `エラー: ${error.message}`;
+          }
+        }
+
+        setError(errorMessage);
+        message.error(errorMessage);
+      } finally {
+        setLoading(false);
       }
+    },
+    [isCompleted, router]
+  );
 
-      setError(errorMessage);
-      message.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onReset = () => {
+  const onReset = useCallback(() => {
     // 完了状態では実行しない
     if (isCompleted) return;
 
     // form.resetFields();
     setError(null);
-  };
+  }, [isCompleted]);
 
   return (
     <FormContainer>
