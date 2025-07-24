@@ -1,6 +1,24 @@
 // メモ化用のキャッシュ
 const imgixUrlCache = new Map<string, string>();
 
+// テキスト長に応じてフォントサイズを動的調整
+const getOptimalFontSize = (text: string): string => {
+  const length = text.length;
+  if (length <= 10) return "56";
+  if (length <= 15) return "52";
+  if (length <= 20) return "48";
+  if (length <= 25) return "44";
+  return "40";
+};
+
+// テキスト長に応じてパディングも調整
+const getOptimalPadding = (text: string): string => {
+  const length = text.length;
+  if (length <= 15) return "60";
+  if (length <= 25) return "80";
+  return "100";
+};
+
 export const generateImgixOgpUrl = (title: string): string => {
   // キャッシュにあれば返す
   if (imgixUrlCache.has(title)) {
@@ -9,24 +27,6 @@ export const generateImgixOgpUrl = (title: string): string => {
 
   const imgixDomain = process.env.IMGIX_URL || "your-imgix-domain.imgix.net";
   const baseImage = "yep/ogp.jpg";
-
-  // テキスト長に応じてフォントサイズを動的調整
-  const getOptimalFontSize = (text: string): string => {
-    const length = text.length;
-    if (length <= 10) return "56";
-    if (length <= 15) return "52";
-    if (length <= 20) return "48";
-    if (length <= 25) return "44";
-    return "40";
-  };
-
-  // テキスト長に応じてパディングも調整
-  const getOptimalPadding = (text: string): string => {
-    const length = text.length;
-    if (length <= 15) return "60";
-    if (length <= 25) return "80";
-    return "100";
-  };
 
   const fontSize = getOptimalFontSize(title);
   const padding = getOptimalPadding(title);
