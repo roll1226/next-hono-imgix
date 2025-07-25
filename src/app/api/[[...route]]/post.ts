@@ -79,22 +79,20 @@ const app = new Hono()
       const { id } = c.req.param();
       const numericId = parseInt(id);
 
-      if (isNaN(numericId)) {
-        return c.json({ error: "Invalid ID" }, 400);
-      }
+      if (isNaN(numericId)) return c.json({ error: "Invalid ID" }, 400);
 
-      const post = await db.select().from(posts).where(eq(posts.id, numericId));
+      const resPosts = await db
+        .select()
+        .from(posts)
+        .where(eq(posts.id, numericId));
+      const post = resPosts.at(0);
+      if (!post) return c.json({ error: "Post not found" }, 404);
 
-      if (post.length === 0) {
-        return c.json({ error: "Post not found" }, 404);
-      }
-
-      const ogpUrl = generateImgixOgpUrl(post[0].title);
-
+      const ogpUrl = generateImgixOgpUrl(post.title, post.createdAt);
       return c.json({
         ogpUrl,
-        title: post[0].title,
-        description: post[0].description,
+        title: post.title,
+        description: post.description,
       });
     } catch (error) {
       console.error("Failed to generate OGP:", error);

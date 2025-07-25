@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 // メモ化用のキャッシュ
 const imgixUrlCache = new Map<string, string>();
 
@@ -19,10 +21,15 @@ const getOptimalPadding = (text: string): string => {
   return "100";
 };
 
-export const generateImgixOgpUrl = (title: string): string => {
+export const generateImgixOgpUrl = (
+  title: string,
+  createdAt?: Date | string
+): string => {
+  const cacheKey = createdAt ? `${title}:${createdAt}` : title;
+
   // キャッシュにあれば返す
-  if (imgixUrlCache.has(title)) {
-    return imgixUrlCache.get(title)!;
+  if (imgixUrlCache.has(cacheKey)) {
+    return imgixUrlCache.get(cacheKey)!;
   }
 
   const imgixDomain = process.env.IMGIX_URL || "your-imgix-domain.imgix.net";
@@ -30,6 +37,14 @@ export const generateImgixOgpUrl = (title: string): string => {
 
   const fontSize = getOptimalFontSize(title);
   const padding = getOptimalPadding(title);
+
+  // 投稿日のフォーマット
+  let formattedDate = "";
+  if (createdAt) {
+    const date =
+      typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+    formattedDate = format(date, "yyyy/MM/dd");
+  }
 
   const params = new URLSearchParams({
     txt: title, // タイトルテキスト
@@ -49,6 +64,25 @@ export const generateImgixOgpUrl = (title: string): string => {
     q: "90", // 画質を高めに設定
   });
 
+  // 投稿日がある場合はblendで左下に追加
+  if (formattedDate) {
+    // 透明な1x1画像をベースに日付テキストを生成
+    const transparentPixel = "https://assets.imgix.net/~text";
+    const dateImageUrl =
+      `${transparentPixel}` +
+      `?txt=${encodeURIComponent(formattedDate)}` +
+      `&txt-size=24` +
+      `&txt-color=666666` +
+      `&txt-font=Hiragino+Sans+W3` +
+      `&txt-align=left,bottom` +
+      `&txt-pad=40` +
+      `&w=1200` +
+      `&h=630`;
+
+    params.set("blend", encodeURIComponent(dateImageUrl));
+    params.set("blend-mode", "normal");
+  }
+
   const url = `https://${imgixDomain}/${baseImage}?${params.toString()}`;
 
   // キャッシュに保存（最大100個まで）
@@ -58,7 +92,7 @@ export const generateImgixOgpUrl = (title: string): string => {
       imgixUrlCache.delete(firstKey);
     }
   }
-  imgixUrlCache.set(title, url);
+  imgixUrlCache.set(cacheKey, url);
 
   return url;
 };
