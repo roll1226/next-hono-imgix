@@ -66,18 +66,18 @@ export const generateImgixOgpUrl = (
 
   // 投稿日がある場合はblendで左下に追加
   if (formattedDate) {
-    // 透明な1x1画像をベースに日付テキストを生成
+    // 日付テキストを生成
     const transparentPixel = "https://assets.imgix.net/~text";
     const dateImageUrl =
       `${transparentPixel}` +
-      `?txt=${encodeURIComponent(formattedDate)}` +
-      `&txt-size=24` +
-      `&txt-color=666666` +
-      `&txt-font=Hiragino+Sans+W3` +
-      `&txt-align=left,bottom` +
-      `&txt-pad=40` +
-      `&w=1200` +
-      `&h=630`;
+      `?txt=${encodeURIComponent(formattedDate)}` + // 日付テキスト
+      `&txt-size=24` + // フォントサイズ
+      `&txt-color=666666` + // 日付のテキストカラー
+      `&txt-font=Hiragino Sans W6` + // フォント
+      `&txt-align=left,bottom` + // 左下に配置
+      `&txt-pad=40` + // パディング
+      `&w=1200` + // OGP画像の幅
+      `&h=630`; // OGP画像の高さ
 
     params.set("blend", encodeURIComponent(dateImageUrl));
     params.set("blend-mode", "normal");
