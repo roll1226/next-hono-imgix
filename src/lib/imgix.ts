@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 
+// 定数定義
 const CACHE_MAX_SIZE = 100;
 const OGP_WIDTH = 1200;
 const OGP_HEIGHT = 630;
@@ -7,6 +8,7 @@ const DEFAULT_IMGIX_DOMAIN = "your-imgix-domain.imgix.net";
 const BASE_IMAGE_PATH = "yep/ogp.jpg";
 const TRANSPARENT_TEXT_URL = "https://assets.imgix.net/~text";
 
+// フォントサイズ設定
 const FONT_SIZE_CONFIG = {
   EXTRA_LARGE: "56", // 10文字以下
   LARGE: "52", // 15文字以下
@@ -15,12 +17,14 @@ const FONT_SIZE_CONFIG = {
   EXTRA_SMALL: "40", // 26文字以上
 } as const;
 
+// パディング設定
 const PADDING_CONFIG = {
   SMALL: "60", // 15文字以下
   MEDIUM: "80", // 25文字以下
   LARGE: "100", // 26文字以上
 } as const;
 
+// テキストスタイル設定
 const TITLE_STYLE = {
   COLOR: "333333",
   FONT: "Hiragino Sans W6",
@@ -39,6 +43,7 @@ const DATE_STYLE = {
   PADDING: "40",
 } as const;
 
+// 画像品質設定
 const IMAGE_QUALITY = {
   HIGH: "90",
   CROP_FIT: "crop",
@@ -102,7 +107,7 @@ export const generateImgixOgpUrl = (title: string, createdAt: Date): string => {
 
   // 投稿日をblendで左下に追加
   const dateImageUrl =
-    `${TRANSPARENT_TEXT_URL}` +
+    TRANSPARENT_TEXT_URL +
     `?txt=${encodeURIComponent(formattedDate)}` + // 日付テキスト
     `&txt-size=${DATE_STYLE.SIZE}` + // フォントサイズ
     `&txt-color=${DATE_STYLE.COLOR}` + // 日付のテキストカラー

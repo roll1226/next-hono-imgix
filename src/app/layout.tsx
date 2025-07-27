@@ -21,6 +21,19 @@ export const metadata: Metadata = {
     default: "yep demo post",
   },
   description: "投稿を作成・共有できるデモサイト",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 const RootLayout = ({
